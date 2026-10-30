@@ -1,0 +1,116 @@
+% lessonbook_macros.tex — layout macros for the PDF-first narrative lessonbook.
+% \input AFTER documentclass + fontspec/polyglossia + font setup (see main_lessonbook.tex.j2).
+% Visible-structure policy: docs/LESSONBOOK_VISIBLE_STRUCTURE_POLICY.md
+%   -> natural Persian cues, NO report headings (Glossary/Symbol Table/High-yield/Common traps).
+% NO documentclass / NO font setup here (font name is dynamic, set in the .j2).
+
+\definecolor{lbnavy}{RGB}{26,42,84}
+\definecolor{lbteal}{RGB}{0,121,121}
+\definecolor{lbamber}{RGB}{176,108,0}
+\definecolor{lbgray}{RGB}{92,92,92}
+
+% consistent vertical spacing around all teaching boxes (page rhythm)
+\tcbset{before skip=0.7em, after skip=0.7em}
+
+% --- LTR English run inside the RTL Persian body (the core mixed-text fix) ---
+% Wrapped in \mbox so the LTR run never breaks across a line under bidi, and set in
+% the English font (Arial) for a clean, consistent Latin face inside the Persian body.
+\newcommand{\lrterm}[1]{\leavevmode\mbox{\textenglish{\englishfont #1}}}
+\newcommand{\ltrterm}[1]{\lrterm{#1}}   % public alias required by the renderer spec
+
+% --- inline term introduction at FIRST use (NOT a glossary block) ---
+% \termintro{English}{Persian gloss} -> **English** (Persian gloss), inline in prose;
+% term+gloss kept unbroken with a thin space before the parenthesis.
+\newcommand{\termintro}[2]{\textbf{\ltrterm{#1}}\nobreak\,(#2)}
+
+% --- inline English enumeration (compact LTR list) ---
+% Groups a comma-separated run of English terms into ONE left-to-right span so the
+% items keep their source order and can break across lines. Fixes the per-term
+% island reversal that scrambles English lists embedded in the RTL Persian body
+% (e.g. an outline list "Bibliography, Introduction, LDA, ...").
+\newcommand{\lrgroup}[1]{\leavevmode\textenglish{\englishfont #1}}
+
+% --- compact aligned mini-list (symbol glosses; multi-formula answers) ---
+% Tight bulleted list so symbol tables and loss/formula comparisons read as a clean
+% aligned list instead of one crowded inline Persian-English-math line. Uses a raw
+% list env (no extra package) with small spacing; polyglossia mirrors it for RTL.
+\newenvironment{lbminilist}{%
+  \begin{list}{\textbullet}{%
+    \setlength{\topsep}{0.18em}\setlength{\partopsep}{0pt}%
+    \setlength{\parsep}{0pt}\setlength{\itemsep}{0.14em}%
+    \setlength{\leftmargin}{1.5em}\setlength{\rightmargin}{0pt}%
+    \setlength{\labelsep}{0.45em}\setlength{\labelwidth}{0.9em}}%
+}{\end{list}}
+
+% --- book + chapter headings (article class: no book-style blank pages) ---
+\newcommand{\lessonbooktitle}[1]{\begin{center}{\Huge\bfseries #1}\end{center}\vspace{1.2em}}
+\newcommand{\lessonchapter}[2]{%
+  \par\vspace{1.1em}%
+  {\color{lbteal}\rule{\linewidth}{1pt}}\par\vspace{0.2em}%
+  {\large\color{lbgray}\textbf{فصل~#1}}\par\vspace{0.1em}%
+  {\LARGE\bfseries #2}\par\vspace{0.2em}%
+  {\color{lbteal}\rule{\linewidth}{0.5pt}}\par\vspace{0.8em}}
+
+% --- source page screenshot anchor (centered, scaled, never overflows) ---
+% \sourcepage[what to notice]{image path}
+\newtcolorbox{lbnoticebox}{enhanced, arc=1.6mm, boxrule=0.5pt, colback=lbteal!5,
+  colframe=lbteal, left=2mm, right=2mm, top=1mm, bottom=1mm}
+% Full-slide anchor = SECONDARY (trace/context): smaller, light gray label, kept
+% together with its notice via a minipage so it never strands across a page.
+\newcommand{\sourcepage}[2][]{%
+  \par\addvspace{0.8em}\needspace{0.20\textheight}%
+  \begin{center}\begin{minipage}{0.96\linewidth}\centering
+  {\small\itshape\color{lbgray}اسلاید اصلی (مرجع/زمینه)}\par\vspace{0.25em}%
+  \includegraphics[width=0.66\linewidth, height=0.34\textheight, keepaspectratio]{#2}%
+  \ifblank{#1}{}{\par\vspace{0.3em}\begin{lbnoticebox}{\small\textbf{به این نگاه کن:} #1}\end{lbnoticebox}}%
+  \end{minipage}\end{center}\addvspace{0.9em}}
+
+% --- guided reading of a source page (light prose block, not a labeled section) ---
+\newtcolorbox{lbguided}{enhanced, breakable, arc=1.6mm, boxrule=0.5pt, colback=lbgray!6,
+  colframe=lbgray!55, left=2.5mm, right=2.5mm, top=1.4mm, bottom=1.4mm}
+\newcommand{\guidedreading}[1]{\begin{lbguided}#1\end{lbguided}}
+
+% --- formula walkthrough box: motivation + math + symbol prose live INSIDE ---
+\newtcolorbox{lbmathbox}{enhanced, breakable, arc=1.6mm, boxrule=0.7pt, colback=lbnavy!6,
+  colframe=lbnavy, left=2.5mm, right=2.5mm, top=1.6mm, bottom=1.6mm,
+  fonttitle=\bfseries, title={حالا فرمول را آرام باز کنیم}}
+\newcommand{\mathwalkthrough}[1]{\begin{lbmathbox}#1\end{lbmathbox}}
+
+% --- worked example (immediately after the concept/formula) ---
+\newtcolorbox{lbexample}{enhanced, arc=1.6mm, boxrule=0.6pt, colback=lbgray!6,
+  colframe=lbgray!60, fonttitle=\bfseries, title={یک مثال کوچک}}
+\newcommand{\examplebox}[1]{\begin{lbexample}#1\end{lbexample}}
+
+% --- small practice AFTER learning ---
+\newtcolorbox{lbpractice}{enhanced, arc=1.6mm, boxrule=0.6pt, colback=lbteal!6,
+  colframe=lbteal, fonttitle=\bfseries, title={یک تمرین کوچک}}
+\newcommand{\smallpractice}[1]{\begin{lbpractice}#1\end{lbpractice}}
+
+% --- exam-trap aside (only when useful) ---
+\newtcolorbox{lbtrap}{enhanced, arc=1.6mm, boxrule=0.6pt, colback=lbamber!8,
+  colframe=lbamber, fonttitle=\bfseries, title={حواست باشد}}
+\newcommand{\examtrap}[1]{\begin{lbtrap}#1\end{lbtrap}}
+
+% --- end-of-section recap (natural consolidation, NOT a checklist) ---
+\newtcolorbox{lbrecap}{enhanced, breakable, arc=1.6mm, boxrule=0.6pt, colback=lbteal!4,
+  colframe=lbteal!70, fonttitle=\bfseries, title={جمع‌بندی این بخش}}
+\newcommand{\teacherrecap}[1]{\begin{lbrecap}#1\end{lbrecap}}
+
+% --- teaching visuals placed NEXT TO the prose (crops / annotated / generated) ---
+% Image + caption kept together (minipage, never split across pages) with comfortable
+% spacing and a consistent centered italic-gray caption. Width-driven sizing so wide
+% crops (e.g. ch3 loss blocks) stay readable and uncramped.
+\newcommand{\cropfigure}[2]{%
+  \par\addvspace{0.7em}\needspace{0.16\textheight}%
+  \begin{center}\begin{minipage}{0.95\linewidth}\centering
+  \includegraphics[width=0.9\linewidth, height=0.46\textheight, keepaspectratio]{#1}\par
+  \vspace{0.35em}{\small\itshape\color{lbgray}#2}%
+  \end{minipage}\end{center}\addvspace{0.8em}}
+% \annotatedfigure{path}{caption} — an adapted teaching visual (annotated/masked/generated),
+% explicitly labelled as adapted (not verbatim source).
+\newcommand{\annotatedfigure}[2]{%
+  \par\addvspace{0.7em}\needspace{0.16\textheight}%
+  \begin{center}\begin{minipage}{0.95\linewidth}\centering
+  \includegraphics[width=0.9\linewidth, height=0.46\textheight, keepaspectratio]{#1}\par
+  \vspace{0.35em}{\small\color{lbteal}\textbf{بازنماییِ آموزشی (اقتباس‌شده):}\ }{\small\itshape\color{lbgray}#2}%
+  \end{minipage}\end{center}\addvspace{0.8em}}

@@ -1,0 +1,8 @@
+provider: manual
+mode: manual
+model: ''
+max_cost_per_run: 0
+fail_closed_if_budget_unknown: true
+redact_api_keys_in_reports: true
+cache_enabled: true
+allowed_stages: {}

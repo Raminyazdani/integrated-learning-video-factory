@@ -1,0 +1,18 @@
+{
+  "provider_chain": [],
+  "providers": {
+    "edge": {
+      "enabled": false
+    },
+    "gemini_tts": {
+      "enabled": false
+    },
+    "gtts": {
+      "enabled": false
+    },
+    "pyttsx3": {
+      "enabled": false
+    }
+  },
+  "default_language": "fa"
+}

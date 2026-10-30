@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/lessonbook_chapter_narrative.schema.json",
+  "title": "lessonbook_chapter_narrative",
+  "description": "Claude-authored woven chapter: the Layer-A -> Layer-B bridge. Every teaching element is ATTACHED to an ordered prose beat (woven, not dumped). The .md twin is the human prose; this JSON is the structured source the LaTeX architect renders. Enforces docs/NARRATIVE_PEDAGOGY_POLICY.md + LESSONBOOK_VISIBLE_STRUCTURE_POLICY.md.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "chapter_id", "package_id", "provenance", "source_pages", "title_fa", "layer", "beats", "recap_fa", "confidence"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "chapter_id": { "type": "string", "pattern": "^chapter_[0-9]+$" },
+    "package_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] }, "timestamp": { "type": "string" } } },
+    "source_pages": { "type": "array", "minItems": 1, "items": { "type": "integer" } },
+    "title_fa": { "type": "string", "minLength": 1 },
+    "layer": { "const": "A_to_B_bridge" },
+    "narrative_md_path": { "type": "string", "description": "run-relative path to the prose .md twin" },
+    "beats": {
+      "type": "array", "minItems": 3,
+      "description": "ordered prose beats; each MUST carry prose_fa (prose-first). Elements attach to a beat (woven). Must open with intuition and end with a recap.",
+      "items": { "$ref": "#/$defs/narrative_beat" },
+      "allOf": [
+        { "contains": { "type": "object", "required": ["type"], "properties": { "type": { "const": "opening_intuition" } } } },
+        { "contains": { "type": "object", "required": ["type"], "properties": { "type": { "const": "recap" } } } }
+      ]
+    },
+    "term_intros": {
+      "type": "array",
+      "description": "inline first-occurrence term introductions (monotonic; no glossary block).",
+      "items": { "type": "object", "required": ["term_en", "gloss_fa", "first_use_beat"], "properties": {
+        "term_en": { "type": "string" }, "gloss_fa": { "type": "string" }, "first_use_beat": { "type": "string", "description": "beat_id of first inline use" }, "keep_english": { "type": "boolean" } } }
+    },
+    "formulas": {
+      "type": "array",
+      "description": "each formula must be motivated BEFORE it appears and attached to a beat.",
+      "items": { "$ref": "#/$defs/formula_woven" }
+    },
+    "figures": {
+      "type": "array",
+      "items": { "type": "object", "required": ["source_page", "anchor_beat", "what_to_notice_fa"], "properties": {
+        "source_page": { "type": "integer" }, "image_path": { "type": "string" },
+        "crop_box": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+        "axes_fa": { "type": "string" }, "takeaway_fa": { "type": "string" },
+        "what_to_notice_fa": { "type": "string", "description": "what the learner should look at (anchor, not decoration)" },
+        "anchor_beat": { "type": "string", "description": "beat_id this screenshot anchors" } } }
+    },
+    "examples": {
+      "type": "array",
+      "items": { "type": "object", "required": ["after_concept", "statement_fa"], "properties": {
+        "after_concept": { "type": "string", "description": "the concept/formula this example follows immediately" },
+        "statement_fa": { "type": "string" },
+        "steps_fa": { "type": "array", "items": { "type": "string" } },
+        "answer_fa": { "type": "string" },
+        "attaches_to_beat": { "type": "string" } } }
+    },
+    "exam_insights": {
+      "type": "array",
+      "items": { "type": "object", "required": ["near_concept", "text_fa"], "properties": {
+        "near_concept": { "type": "string", "description": "concept this trap sits beside (woven, not an end-list)" },
+        "text_fa": { "type": "string" },
+        "attaches_to_beat": { "type": "string" } } }
+    },
+    "practice": {
+      "type": "array",
+      "items": { "type": "object", "required": ["after_idea", "question_fa"], "properties": {
+        "after_idea": { "type": "string", "description": "the idea this practice consolidates (placed AFTER teaching)" },
+        "question_fa": { "type": "string" }, "hint_fa": { "type": "string" }, "answer_fa": { "type": "string" },
+        "attaches_to_beat": { "type": "string" } } }
+    },
+    "recap_fa": { "type": "string", "minLength": 1, "description": "natural human consolidation (not a mechanical checklist)" },
+    "claims": {
+      "type": "array",
+      "description": "every non-trivial claim is either grounded in the source or explicitly marked as educational inference.",
+      "items": { "type": "object", "required": ["text_fa", "support"], "properties": {
+        "text_fa": { "type": "string" },
+        "support": { "enum": ["source", "educational_inference"] },
+        "source_tag": { "type": "string", "description": "e.g. [منبع: page-06] when support=source" } } }
+    },
+    "source_grounding": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "ref": { "type": "string" }, "source_tag": { "type": "string" } } }
+    },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } },
+    "confidence": {
+      "type": "object",
+      "required": ["foundation", "math", "coherence"],
+      "properties": {
+        "extraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "foundation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "math": { "type": "number", "minimum": 0, "maximum": 1 },
+        "coherence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "style_constraints": {
+      "type": "object",
+      "description": "declarative markers the Coherence/Final QA reads; the PDF must honor them.",
+      "properties": {
+        "no_glossary_dump": { "const": true },
+        "no_robotic_headings": { "const": true },
+        "terms_inline_first_use": { "const": true },
+        "prose_first": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "beat_type": {
+      "enum": ["opening_intuition", "why_it_matters", "source_anchor", "guided_explanation", "term_intro", "formula", "example", "geometric_meaning", "exam_insight", "practice", "recap", "transition"]
+    },
+    "narrative_beat": {
+      "type": "object",
+      "required": ["beat_id", "type", "prose_fa"],
+      "additionalProperties": true,
+      "properties": {
+        "beat_id": { "type": "string" },
+        "type": { "$ref": "#/$defs/beat_type" },
+        "prose_fa": { "type": "string", "minLength": 1, "description": "the actual woven tutor prose for this beat (prose-first; not a heading or a field dump)" },
+        "source_anchor": { "type": "object", "properties": {
+          "page": { "type": "integer" }, "image_path": { "type": "string" },
+          "crop_box": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+          "what_to_notice_fa": { "type": "string" } } },
+        "element_refs": { "type": "array", "items": { "type": "string" }, "description": "ids/keys of formulas/figures/examples/etc. woven into this beat" }
+      }
+    },
+    "formula_woven": {
+      "type": "object",
+      "required": ["formula_latex", "motivation_fa", "attaches_to_beat"],
+      "additionalProperties": true,
+      "properties": {
+        "formula_latex": { "type": "string", "description": "LaTeX math (no plain-text math)" },
+        "motivation_fa": { "type": "string", "minLength": 1, "description": "WHY we need it — appears before the formula" },
+        "symbols": { "type": "array", "items": { "type": "object", "required": ["symbol", "meaning_fa"], "properties": {
+          "symbol": { "type": "string" }, "meaning_fa": { "type": "string" } } }, "description": "symbol meanings explained inline in prose (not a standalone Symbol Table)" },
+        "numeric_example_fa": { "type": "string" },
+        "geometric_fa": { "type": "string" },
+        "common_mistake_fa": { "type": "string" },
+        "attaches_to_beat": { "type": "string" },
+        "source_tag": { "type": "string" }
+      }
+    }
+  }
+}

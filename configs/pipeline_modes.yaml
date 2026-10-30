@@ -1,0 +1,8 @@
+default_mode: manual_agent
+modes:
+  manual_agent: {allow_paid_calls: false}
+  llm_dry_run: {allow_paid_calls: false}
+  llm_paid: {allow_paid_calls: true, requires_approval: true}
+  mechanical_fallback: {allow_paid_calls: false, marks_output_low_quality: true}
+llm_understanding_stages: [visual_review, content_generation, package_titles]
+deterministic_stages: [extraction, classification, segmentation, rendering, qa]

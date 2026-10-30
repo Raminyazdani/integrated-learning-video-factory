@@ -1,0 +1,37 @@
+%% main_lessonbook.tex.j2 — Jinja2 template for the canonical PDF lessonbook.
+%% Jinja delimiters are LaTeX-friendly (configured in lessonbook_latex_renderer._env).
+%% Filled by integrations/lessonbook_latex_renderer.render_book(). XeLaTeX only.
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{etoolbox}
+\usepackage[most]{tcolorbox}
+\usepackage[a4paper,margin=2.4cm,bottom=2.7cm]{geometry}
+\usepackage{polyglossia}
+\setmainlanguage{persian}
+\setotherlanguage{english}
+\setmainfont{<< main_font >>}
+\newfontfamily\englishfont{<< english_font >>}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em plus 0.25em minus 0.1em}
+\linespread{1.22}
+% absorb the slack from long non-breaking LTR terms in justified RTL paragraphs
+\setlength{\emergencystretch}{3em}
+\tolerance=1500
+% page rhythm: keep figures/captions/formulas with their text; avoid widows/orphans
+\usepackage{needspace}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\brokenpenalty=10000
+\input{<< macros_path >>}
+\begin{document}
+<% if book_title %>
+\lessonbooktitle{<< book_title >>}
+<% endif %>
+<% for ch in chapters %>
+<< ch >>
+
+<% endfor %>
+\end{document}

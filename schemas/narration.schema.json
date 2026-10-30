@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/narration.schema.json",
+  "title": "narration",
+  "description": "Stage 7 output. Per-slide Persian narration scripts (per docs/OUTPUT_ARTIFACT_SPEC.md §3.4).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "source_file",
+    "packages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "source_file": { "type": "string" },
+    "language": { "type": "string", "enum": ["fa", "en", "mixed"], "default": "fa" },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["package_id", "slides"],
+        "additionalProperties": true,
+        "properties": {
+          "package_id": { "type": "string", "pattern": "^package_[0-9]{2,3}$" },
+          "slides": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/narration_entry" }
+          }
+        }
+      }
+    },
+    "generated_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "narration_entry": {
+      "type": "object",
+      "required": [
+        "slide_id",
+        "narration_fa",
+        "estimated_seconds"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "slide_id": { "type": "string", "pattern": "^p[0-9]{3}_s[0-9]{3}$" },
+        "slide_title": { "type": ["string", "null"] },
+        "narration_fa": { "type": "string", "minLength": 1 },
+        "estimated_seconds": { "type": "number", "minimum": 0 },
+        "source_pages": {
+          "type": "array",
+          "items": { "type": "integer" }
+        },
+        "requires_math_pronunciation": { "type": "boolean", "default": false },
+        "pronunciation_hints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "term": { "type": "string" },
+              "hint_fa": { "type": "string" }
+            }
+          }
+        },
+        "uncertainty": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "narration_sha256": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

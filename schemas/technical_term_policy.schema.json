@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/technical_term_policy.schema.json",
+  "title": "technical_term_policy",
+  "description": "Per-run bilingual technical-term table (machine-readable form of docs/BILINGUAL_TECHNICAL_TERMS_POLICY.md). Authority for display + TTS + first-occurrence forms. Used by runs/<id>/terminology/bilingual_terms.json.",
+  "type": "object",
+  "required": ["policy_ref", "terms"],
+  "additionalProperties": true,
+  "properties": {
+    "policy_ref": { "type": "string" },
+    "run_id": { "type": "string" },
+    "version": { "type": "string" },
+    "provenance": { "type": "object", "properties": { "authored_by": { "type": "string" }, "timestamp": { "type": "string" } } },
+    "terms": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["term_en", "translate_or_keep", "preferred_display_form", "preferred_tts_form", "first_occurrence_form"],
+        "additionalProperties": true,
+        "properties": {
+          "term_en": { "type": "string" },
+          "term_fa_explanation": { "type": "string" },
+          "preferred_display_form": { "type": "string", "description": "form used on slides/PDF after first occurrence" },
+          "preferred_tts_form": { "type": "string", "description": "natural spoken form for Gemini TTS" },
+          "first_occurrence_form": { "type": "string", "description": "bilingual form: «توضیح فارسی (English term)»" },
+          "translate_or_keep": { "enum": ["keep_english", "bilingual_first", "persian_ok"] },
+          "category": { "enum": ["acronym", "model_name", "algorithm_name", "concept", "symbol", "metric", "other"] },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

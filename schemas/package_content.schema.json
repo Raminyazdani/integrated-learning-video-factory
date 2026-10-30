@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/package_content.schema.json",
+  "title": "package_content",
+  "description": "Stage 4 structured content emitted per package (companion to content_md/package_NN_extended_fa.md). Sections اجباری per docs/PIPELINE_SPEC.md Stage 4.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "package_id",
+    "language",
+    "summary",
+    "learning_goal",
+    "source_grounding"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^package_[0-9]{2,3}$"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "fa",
+        "en",
+        "mixed"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "learning_goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prerequisites_mini_lesson": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "per_page_blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "page_id",
+          "screenshot_path",
+          "explanation_fa"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "page_id": {
+            "type": "string"
+          },
+          "screenshot_path": {
+            "type": "string"
+          },
+          "explanation_fa": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "formula_explanation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "formula": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "notation_table": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "meaning_fa": {
+                  "type": "string"
+                },
+                "dimension": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "tiny_numeric_example": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ml_meaning": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "common_mistakes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "plain_persian_restatement": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "figure_explanation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "figure_id": {
+            "type": "string"
+          },
+          "axes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "legend": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "trend_fa": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "takeaway_fa": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "numerical_example": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "exam_traps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "quick_qa": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "q_fa",
+          "a_fa"
+        ],
+        "properties": {
+          "q_fa": {
+            "type": "string"
+          },
+          "a_fa": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_grounding": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^page_[0-9]{3,}$"
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "package_title": {
+      "type": "string"
+    },
+    "source_pages": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "learning_goals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Plural alias / list version of learning_goal."
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "explanation_fa": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "page_explanations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "page_id"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "User-facing alias of per_page_blocks."
+    },
+    "glossary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "term",
+          "explanation_fa"
+        ],
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "explanation_fa": {
+            "type": "string"
+          },
+          "why_it_matters_fa": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exam_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "common_traps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Alias of exam_traps for common student mistakes."
+    },
+    "quick_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "q_fa",
+          "a_fa"
+        ],
+        "properties": {
+          "q_fa": {
+            "type": "string"
+          },
+          "a_fa": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Alias of quick_qa."
+    },
+    "uncertainty_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Alias of uncertainty."
+    },
+    "image_anchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "page_id",
+          "path"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "alt_fa": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

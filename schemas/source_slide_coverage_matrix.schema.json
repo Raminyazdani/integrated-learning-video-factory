@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/source_slide_coverage_matrix.schema.json",
+  "title": "source_slide_coverage_matrix",
+  "description": "Claude-authored proof that every MEANINGFUL element of each source slide/page is taught in the lessonbook (or excluded with a reason). Enforces docs/SOURCE_SLIDE_EXHAUSTIVE_TEACHING_POLICY.md. QA fails if any critical element is not taught_deeply.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "provenance", "pages"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "package_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] }, "timestamp": { "type": "string" } } },
+    "pages": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_page", "elements"],
+        "additionalProperties": true,
+        "properties": {
+          "source_page": { "type": "integer" },
+          "page_image_path": { "type": "string" },
+          "elements": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/element" } }
+        }
+      }
+    },
+    "coverage_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "critical_total": { "type": "integer" },
+        "critical_taught_deeply": { "type": "integer" },
+        "uncertain_open": { "type": "integer" }
+      }
+    },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "element": {
+      "type": "object",
+      "required": ["element_id", "element_type", "importance", "coverage_status", "grounding"],
+      "additionalProperties": true,
+      "properties": {
+        "element_id": { "type": "string" },
+        "element_type": { "enum": ["title", "section_context", "bullet", "formula", "variable", "figure", "graph", "axis", "legend", "label", "arrow", "line", "region", "caption", "small_text", "example", "assumption", "footer", "navigation", "logo", "decorative", "uncertain"] },
+        "source_text_or_description": { "type": "string" },
+        "importance": { "enum": ["critical", "useful", "decorative"] },
+        "coverage_status": { "enum": ["taught_deeply", "taught_briefly", "excluded_decorative", "uncertain_needs_review"] },
+        "lesson_location": { "type": "string", "description": "where it is taught, e.g. chapter_002 beat b5" },
+        "visual_asset_ids": { "type": "array", "items": { "type": "string" } },
+        "grounding": { "enum": ["source", "prerequisite", "educational_inference"] },
+        "uncertainty_note": { "type": "string" }
+      }
+    }
+  }
+}

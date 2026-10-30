@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/page_review.schema.json",
+  "title": "page_review",
+  "description": "Per-run page-review overlay (LLM/Vision or manual-agent authored). Shape is compatible with authored_review.json so visual_classification_reviewer consumes it directly.",
+  "type": "object",
+  "required": ["run_id", "executor", "reviews"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "source_file": { "type": ["string", "null"] },
+    "executor": {
+      "type": "string",
+      "enum": ["LLM_PAID", "LLM_DRY_RUN", "CLAUDE_CODE_MANUAL_AGENT", "BASELINE_AUTO"]
+    },
+    "pipeline_mode": { "type": ["string", "null"] },
+    "prompt_version": { "type": ["string", "null"] },
+    "low_confidence_pages": { "type": "array", "items": { "type": "integer" } },
+    "segmentation_hints": { "type": "object" },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "reviews": {
+      "type": "object",
+      "description": "page_id -> review entry",
+      "additionalProperties": { "$ref": "#/$defs/review" }
+    }
+  },
+  "$defs": {
+    "review": {
+      "type": "object",
+      "required": [
+        "enriched_primary_label", "enriched_secondary_labels", "visual_summary_fa",
+        "educational_role", "package_boundary_signal", "confidence_after_visual_review",
+        "reason_for_change"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "enriched_primary_label": {
+          "enum": ["title","outline","transition","definition","concept_explanation","theorem","proof","derivation","formula","example","exercise","solution","plot_or_figure","table","code_or_pseudocode","algorithm","summary","bibliography","mixed","unknown","context_only"]
+        },
+        "enriched_secondary_labels": { "type": "array", "items": { "type": "string" } },
+        "visual_summary_fa": { "type": "string", "minLength": 1 },
+        "corrected_title_guess": { "type": ["string", "null"] },
+        "educational_role": { "type": "string", "minLength": 1 },
+        "package_boundary_signal": { "enum": ["start","continue","boundary","context_only","unknown"] },
+        "confidence_after_visual_review": { "enum": ["high","medium","low"] },
+        "reason_for_change": { "type": "string" },
+        "uncertainty_notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

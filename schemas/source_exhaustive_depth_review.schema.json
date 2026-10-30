@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/source_exhaustive_depth_review.schema.json",
+  "title": "source_exhaustive_depth_review",
+  "description": "Claude-authored per-chapter depth review: for each critical/teachable element, records whether the narrative actually teaches it at the required depth (motivation, symbols, example, intuition, common mistake, exam/practical note, visual support, solution steps) and a verdict. Checked by scripts/validate_source_exhaustive_depth.py. Implements the depth half of docs/AUTOMATIC_SOURCE_COVERAGE_AUDIT_LOOP.md.",
+  "type": "object",
+  "required": ["run_id", "source_file", "chapter_id", "reviewed_elements"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "source_file": { "type": "string" },
+    "chapter_id": { "type": "string" },
+    "provenance": {
+      "type": "object",
+      "required": ["authored_by"],
+      "additionalProperties": true,
+      "properties": {
+        "authored_by": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "source_sha256": { "type": "string" }
+      }
+    },
+    "reviewed_elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["element_id", "element_type", "criticality", "required_treatment", "lesson_location", "depth_checks", "verdict"],
+        "additionalProperties": true,
+        "properties": {
+          "element_id": { "type": "string" },
+          "element_type": { "enum": ["title", "section_marker", "navigation", "bullet", "paragraph", "formula", "symbol", "table", "figure", "graph", "diagram", "axis", "legend", "label", "arrow", "colored_region", "caption", "note", "warning", "example", "proof_step", "derivation_step", "summary_item", "extra_reading", "footer", "page_number", "logo", "decorative", "uncertain"] },
+          "criticality": { "enum": ["critical", "useful", "structural", "decorative", "optional_extension", "uncertain"] },
+          "required_treatment": { "enum": ["deep_tutor", "formula_deep_mode", "table_reconstruction", "visual_deep_mode", "proof_walkthrough", "brief_context", "optional_extension_brief", "decorative_exclusion", "uncertainty_review"] },
+          "lesson_location": { "type": "string" },
+          "depth_checks": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "has_motivation": { "type": "boolean" },
+              "has_symbol_explanation": { "type": "boolean" },
+              "has_numeric_example": { "type": "boolean" },
+              "has_intuition": { "type": "boolean" },
+              "has_common_mistake": { "type": "boolean" },
+              "has_exam_or_practical_note": { "type": "boolean" },
+              "has_visual_support": { "type": "boolean" },
+              "has_solution_steps": { "type": "boolean" }
+            }
+          },
+          "verdict": { "enum": ["pass", "needs_fix", "not_applicable"] },
+          "fix_request": { "type": "string" }
+        }
+      }
+    },
+    "chapter_structure_checks": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "optional chapter-level structural flags",
+      "properties": {
+        "has_opening_intuition": { "type": "boolean" },
+        "has_recap": { "type": "boolean" },
+        "summary_only": { "type": "boolean" }
+      }
+    }
+  }
+}

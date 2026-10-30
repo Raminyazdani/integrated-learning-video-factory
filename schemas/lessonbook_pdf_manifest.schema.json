@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/lessonbook_pdf_manifest.schema.json",
+  "title": "lessonbook_pdf_manifest",
+  "description": "Python-produced manifest for the rendered lessonbook PDF (Layer-B render record). Maps chapters -> pages -> source screenshots and records render QA checks. renderer is fixed to xelatex (canonical).",
+  "type": "object",
+  "required": ["schema_version", "run_id", "source_file", "renderer", "tex_path", "pdf_path", "page_count", "chapters", "provenance"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "source_file": { "type": "string" },
+    "renderer": { "const": "xelatex", "description": "LaTeX/XeLaTeX is the canonical PDF renderer" },
+    "engine": { "type": "string" },
+    "tex_path": { "type": "string" },
+    "pdf_path": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "page_count": { "type": "integer", "minimum": 1 },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": {
+      "authored_by": { "enum": ["python_executor"] }, "tex_sha256": { "type": "string" }, "pdf_sha256": { "type": "string" } } },
+    "chapters": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "object", "required": ["chapter_id", "package_id", "title_fa"], "additionalProperties": true, "properties": {
+        "chapter_id": { "type": "string", "pattern": "^chapter_[0-9]+$" },
+        "package_id": { "type": "string" },
+        "title_fa": { "type": "string" },
+        "start_page": { "type": "integer", "minimum": 1 },
+        "end_page": { "type": "integer", "minimum": 1 },
+        "source_pages": { "type": "array", "items": { "type": "integer" } },
+        "screenshots": { "type": "array", "items": { "type": "object", "required": ["image_path"], "properties": {
+          "image_path": { "type": "string" }, "page": { "type": "integer" } } } } } }
+    },
+    "images": {
+      "type": "array",
+      "items": { "type": "object", "required": ["image_path", "exists"], "properties": {
+        "image_path": { "type": "string" }, "exists": { "type": "boolean" }, "page": { "type": "integer" } } }
+    },
+    "fonts": { "type": "array", "items": { "type": "string" } },
+    "checks": {
+      "type": "object",
+      "description": "PDF render QA flags (true = OK).",
+      "properties": {
+        "rtl_ok": { "type": "boolean" },
+        "ltr_terms_ok": { "type": "boolean" },
+        "math_ok": { "type": "boolean" },
+        "no_overfull": { "type": "boolean" },
+        "no_tofu": { "type": "boolean" },
+        "no_raw_ids": { "type": "boolean" },
+        "screenshots_anchored": { "type": "boolean" },
+        "source_coverage": { "type": "boolean" }
+      }
+    }
+  }
+}

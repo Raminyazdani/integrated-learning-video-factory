@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/artifact_manifest.schema.json",
+  "title": "artifact_manifest",
+  "description": "Final per-run artifact map (per docs/OUTPUT_ARTIFACT_SPEC.md §3.5).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "created_at",
+    "source_file",
+    "outputs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "source_file": { "type": "string" },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "final_video": { "type": ["string", "null"] },
+        "full_teaching_deck_pptx": { "type": ["string", "null"] },
+        "full_teaching_deck_pdf": { "type": ["string", "null"] },
+        "package_pdfs_zip": { "type": ["string", "null"] },
+        "summary": { "type": ["string", "null"] }
+      }
+    },
+    "intermediate_artifacts": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "extraction_manifest": { "type": ["string", "null"] },
+        "package_manifest": { "type": ["string", "null"] },
+        "slide_manifest": { "type": ["string", "null"] },
+        "narration_full": { "type": ["string", "null"] }
+      }
+    },
+    "qa_reports": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "page_count": { "type": "integer", "minimum": 0 },
+        "package_count": { "type": "integer", "minimum": 0 },
+        "slide_count": { "type": "integer", "minimum": 0 },
+        "audio_count": { "type": "integer", "minimum": 0 },
+        "video_duration_seconds": { "type": "number", "minimum": 0 },
+        "cost_tokens_in": { "type": "integer", "minimum": 0 },
+        "cost_tokens_out": { "type": "integer", "minimum": 0 },
+        "estimated_cost_usd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "assumptions_applied": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "checksums": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/lessonbook_visual_asset_manifest.schema.json",
+  "title": "lessonbook_visual_asset_manifest",
+  "description": "Python-produced record of the visual assets actually generated for a chapter (crops/annotations/variants/diagrams), their provenance, QA status, and whether each was used in the PDF. Realizes a lessonbook_visual_asset_plan.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "provenance", "assets"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "package_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["python_executor"] }, "timestamp": { "type": "string" } } },
+    "assets": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "path", "source_page"],
+        "additionalProperties": true,
+        "properties": {
+          "asset_id": { "type": "string" },
+          "path": { "type": "string", "description": "run-relative path to the generated/cropped image" },
+          "source_page": { "type": "integer" },
+          "asset_type": { "enum": ["full_slide_anchor", "crop", "annotated_crop", "masked_variant", "generated_teaching_diagram"] },
+          "crop_box": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+          "annotations_applied": { "type": "array", "items": { "type": "string" }, "description": "e.g. arrow, highlight-region, mask-line, callout, zoom" },
+          "caption_fa": { "type": "string" },
+          "generation_method": { "enum": ["source_crop", "python_annotation", "claude_visual_plan", "generated_diagram"] },
+          "is_adapted_teaching_visual": { "type": "boolean", "description": "true for annotated/masked/generated (non-verbatim) visuals" },
+          "qa_status": { "enum": ["pass", "warn", "fail", "pending"] },
+          "used_in_pdf": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

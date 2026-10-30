@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/audio_manifest.schema.json",
+  "title": "audio_manifest",
+  "description": "Stage 8 output. Per-slide TTS audio inventory grouped by package (per docs/PIPELINE_SPEC.md Stage 8 and docs/OUTPUT_ARTIFACT_SPEC.md). One entry per narrated slide.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "generated_at",
+    "provider_summary",
+    "packages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{3}_[a-z0-9_-]+_[0-9]{8}_[0-9]{4}$"
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "language": { "type": "string", "enum": ["fa", "en", "mixed"], "default": "fa" },
+    "provider_summary": {
+      "type": "object",
+      "description": "Roll-up of which TTS provider(s) produced this run's audio.",
+      "additionalProperties": true,
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": ["string", "null"],
+          "description": "Primary TTS provider id selected (e.g. 'edge'); null when no provider was available."
+        },
+        "providers_used": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Distinct provider ids that produced at least one clip (includes fallbacks)."
+        },
+        "slide_count": { "type": "integer", "minimum": 0 },
+        "ok_count": { "type": "integer", "minimum": 0 },
+        "failed_count": { "type": "integer", "minimum": 0 },
+        "pending_count": { "type": "integer", "minimum": 0 },
+        "fallback_count": { "type": "integer", "minimum": 0 },
+        "total_duration_seconds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["package_id", "slides"],
+        "additionalProperties": true,
+        "properties": {
+          "package_id": { "type": "string", "pattern": "^package_[0-9]{2,3}$" },
+          "slides": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/audio_entry" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "audio_entry": {
+      "type": "object",
+      "description": "One synthesized slide audio clip.",
+      "required": [
+        "slide_id",
+        "audio_path",
+        "duration_seconds",
+        "provider",
+        "status"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "slide_id": { "type": "string", "pattern": "^p[0-9]{3}_s[0-9]{3}$" },
+        "audio_path": {
+          "type": "string",
+          "description": "Run-relative path, e.g. audio/package_001/slide_001.mp3."
+        },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "provider": {
+          "type": ["string", "null"],
+          "description": "Provider id that produced this clip (edge/gtts/pyttsx3/...); null if not produced."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ok", "failed", "skipped", "pending"]
+        },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "sample_rate_hz": { "type": ["integer", "null"], "minimum": 0 },
+        "voice": { "type": ["string", "null"] },
+        "narration_sha256": { "type": ["string", "null"] },
+        "error": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

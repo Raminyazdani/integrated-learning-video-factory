@@ -1,0 +1,74 @@
+% ============================================================================
+% Persian package-PDF template - XeLaTeX + polyglossia
+%
+% Used by integrations/latex_builder.py and agents/pdf_builder_agent.py
+% (Phase 5+). The template uses {{double-curly}} placeholders that the
+% builder substitutes at render time. Phase 5A (smoke) bypasses this
+% template; Phase 5B uses it for every per-package PDF.
+%
+% Required toolchain:
+%   - XeLaTeX (TeX Live 2020+)
+%   - polyglossia (preferred). xepersian is acceptable but not required;
+%     polyglossia provides Persian RTL out of the box when bidi is installed.
+%   - fontspec, graphicx, geometry, hyperref
+%
+% Font cascade (resolved by pdf_builder_agent against configs/persian_fonts.json):
+%   Vazirmatn -> Tahoma -> Arial -> DejaVu Sans (final fallback in sandboxes).
+%
+% Image-anchor convention (per Persian PDF Tutor rule and content_md/*.md):
+%   \includegraphics from ../extracted/pages/page_NNN.png - paths inside
+%   package_NN_extended_fa.md resolve to the same location when the .tex
+%   file lives in runs/<run_id>/latex/.
+% ============================================================================
+
+\documentclass[12pt,a4paper]{article}
+
+% --- core packages ----------------------------------------------------------
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{graphicx}
+\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+
+% --- language setup (polyglossia) -------------------------------------------
+\setdefaultlanguage{persian}
+\setotherlanguage{english}
+
+% --- font cascade -----------------------------------------------------------
+% {{MAIN_FONT}} is resolved by pdf_builder_agent. If none of the configured
+% fonts are installed, the agent substitutes a final fallback.
+\setmainfont{{{MAIN_FONT}}}[Script=Arabic, Language=Default]
+\newfontfamily\englishfont{{{ENGLISH_FONT}}}
+\newfontfamily\persianfont{{{MAIN_FONT}}}[Script=Arabic]
+\newfontfamily\codefamily{{{MONO_FONT}}}
+
+% --- hyperref styling -------------------------------------------------------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+  pdftitle={{{PDF_TITLE}}},
+  pdfauthor={integrated_learning_video_factory},
+  pdfsubject={Persian extended ML content},
+  bookmarksopen=true
+}
+
+% --- helpers ----------------------------------------------------------------
+\newcommand{\en}[1]{\textenglish{#1}}
+
+\begin{document}
+
+\begin{center}
+{\Huge\bfseries {{PDF_TITLE}}}\\[1ex]
+{\large {{PDF_SUBTITLE}}}
+\end{center}
+
+\bigskip
+
+{{BODY}}
+
+\end{document}

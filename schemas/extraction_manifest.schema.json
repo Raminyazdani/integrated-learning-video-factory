@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/extraction_manifest.schema.json",
+  "title": "extraction_manifest",
+  "description": "Stage 1 output. Per-page extraction metadata (per docs/OUTPUT_ARTIFACT_SPEC.md §3.1).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "source_file",
+    "source_type",
+    "source_sha256",
+    "page_count",
+    "pages",
+    "extracted_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_copy": {
+      "type": "string",
+      "description": "Path to per-run copy of source file (e.g., runs/<run_id>/source/N.pdf)"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "pptx"
+      ]
+    },
+    "file_type": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "pptx"
+      ],
+      "description": "Alias of source_type (identical value)."
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "page_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/page_entry"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "extracted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "extraction_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Alias of extracted_at (identical value)."
+    }
+  },
+  "$defs": {
+    "page_entry": {
+      "type": "object",
+      "required": [
+        "page_id",
+        "page_number",
+        "image_path",
+        "text_path"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "page_id": {
+          "type": "string",
+          "pattern": "^page_[0-9]{3,}$"
+        },
+        "page_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page_index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based index parallel to page_number."
+        },
+        "image_path": {
+          "type": "string"
+        },
+        "text_path": {
+          "type": "string"
+        },
+        "text_sha256": {
+          "type": "string"
+        },
+        "image_sha256": {
+          "type": "string"
+        },
+        "title_guess": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "language_detected": {
+          "type": "string"
+        },
+        "unreadable": {
+          "type": "boolean"
+        },
+        "figures": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "math_fragments_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "speaker_notes_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "text_char_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "extraction_status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "empty_text",
+            "render_failed",
+            "partial",
+            "skipped"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

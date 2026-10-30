@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/slide_spec.schema.json",
+  "title": "slide_spec",
+  "description": "Claude-authored slide plan for one package (source of truth). Python renders it; never decides the plan.",
+  "type": "object",
+  "required": ["run_id", "package_id", "provenance", "source_pages", "uncertainty_notes", "slides"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "package_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] } } },
+    "source_pages": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } },
+    "slides": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["order", "type", "title"],
+        "additionalProperties": true,
+        "properties": {
+          "order": { "type": "integer", "minimum": 1 },
+          "type": { "enum": ["divider", "concept", "formula_card", "source_crop", "example", "comparison", "quiz", "checkpoint", "takeaway", "anchor", "summary", "other", "original_preview", "enriched_teaching", "original_guided_reading", "original_recap"] },
+          "title": { "type": "string" },
+          "display_text": { "type": ["string", "null"] },
+          "display_text_fa": { "type": ["string", "null"], "description": "Persian on-slide text (preferred over display_text)" },
+          "source_page": { "type": ["integer", "null"], "description": "1-based source page this slide is built from" },
+          "original_slide_image_path": { "type": ["string", "null"], "description": "run-relative path to the full original lecture page image" },
+          "source_crop_path": { "type": ["string", "null"], "description": "run-relative path to a cropped/zoomed region of the original page" },
+          "technical_terms_en": { "type": "array", "items": { "type": "string" }, "description": "English technical terms surfaced on this slide" },
+          "layout_intent": { "type": ["string", "null"] },
+          "narration_goal": { "type": ["string", "null"] },
+          "tts_notes": { "type": ["string", "null"] },
+          "source_crop": { "type": ["object", "null"] }
+        }
+      }
+    }
+  }
+}

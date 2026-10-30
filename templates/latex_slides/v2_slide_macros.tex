@@ -1,0 +1,32 @@
+% v2_slide_macros.tex — shared layout macros for the v2 deep-tutor LaTeX deck.
+% \input after documentclass + fontspec/polyglossia + font setup (see the .j2).
+% Defines colors, tcolorbox card styles, the LTR-term command, image helpers.
+% NO documentclass / NO font setup here (font name is dynamic, set in the .j2).
+
+\definecolor{v2navy}{RGB}{26,42,84}
+\definecolor{v2teal}{RGB}{0,121,121}
+\definecolor{v2gray}{RGB}{92,92,92}
+\definecolor{v2bg}{RGB}{247,248,250}
+
+% Force every Latin/English technical run to render LEFT-TO-RIGHT inside the
+% RTL Persian body. This is the core fix for the v1 mixed-ordering defect.
+% Wrapped in \mbox so the LTR run never breaks across a line (which would
+% leave an unbalanced \endL/\endR under bidi). \protect-safe for frame titles.
+\newcommand{\lrterm}[1]{\leavevmode\mbox{\textenglish{#1}}}
+
+% Card styles (tcolorbox). Titles bold; rounded; restrained fills.
+\tcbset{v2base/.style={arc=2mm, boxrule=0.7pt, left=2mm, right=2mm, top=1.4mm, bottom=1.4mm, fonttitle=\bfseries}}
+\newtcolorbox{conceptcard}[1][]{v2base, colback=v2teal!7, colframe=v2teal, fontupper=\small, #1}
+\newtcolorbox{formulacard}[1][]{v2base, colback=v2navy!7, colframe=v2navy, #1}
+\newtcolorbox{graycard}[1][]{v2base, colback=v2gray!8, colframe=v2gray, fontupper=\small, #1}
+\newtcolorbox{questioncard}[1][]{v2base, colback=v2teal!5, colframe=v2teal, #1}
+\newtcolorbox{answercard}[1][]{v2base, colback=white, colframe=v2gray, #1}
+
+% Source-slide image, scaled to fit (keeps aspect ratio; never overflows).
+\newcommand{\sourceimg}[2][0.92\linewidth]{%
+  \begin{center}\includegraphics[width=#1, height=0.66\textheight, keepaspectratio]{#2}\end{center}}
+\newcommand{\sourceimgsmall}[2][0.9\linewidth]{%
+  \begin{center}\includegraphics[width=#1, height=0.46\textheight, keepaspectratio]{#2}\end{center}}
+
+% A small "badge" line (e.g. «نگاه اول به اسلاید اصلی»).
+\newcommand{\srcbadge}[1]{{\color{v2teal}\bfseries #1}\par\vspace{0.6mm}}

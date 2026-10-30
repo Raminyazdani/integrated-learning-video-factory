@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/run_state.schema.json",
+  "title": "run_state",
+  "description": "Per-run state file. Atomic writes + snapshot rotation (per docs/CONTEXT_MANAGEMENT_AND_STATE.md §3, §4).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "source_file",
+    "created_at",
+    "updated_at",
+    "current_stage",
+    "completed_stages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[0-9]{3}_[a-z0-9_-]+_[0-9]{8}_[0-9]{4}$"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "pdf",
+        "pptx",
+        "unknown"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_stage": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "completed_stages": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 10
+      },
+      "uniqueItems": true
+    },
+    "completed_stage_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "description": "Human-friendly stage names parallel to completed_stages (e.g., input_intake, pdf_extraction)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "done",
+        "failed",
+        "halted"
+      ]
+    },
+    "latest_run_id": {
+      "type": "string",
+      "description": "When this state file is the project-level pointer (state/run_state.json at root), holds the most recent run_id."
+    },
+    "failed_stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage",
+          "reason"
+        ],
+        "properties": {
+          "stage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "reason": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^package_[0-9]{2,3}$"
+          },
+          "stage4": {
+            "$ref": "#/$defs/stage_status"
+          },
+          "stage5": {
+            "$ref": "#/$defs/stage_status"
+          },
+          "stage6": {
+            "$ref": "#/$defs/stage_status"
+          },
+          "stage7": {
+            "$ref": "#/$defs/stage_status"
+          },
+          "stage8": {
+            "$ref": "#/$defs/stage_status"
+          },
+          "stage9": {
+            "$ref": "#/$defs/stage_status"
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stage",
+          "message"
+        ],
+        "properties": {
+          "stage": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "snapshots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cost_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "total_tokens_in": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_tokens_out": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "estimated_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stage_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "done",
+        "failed",
+        "skipped"
+      ]
+    }
+  }
+}

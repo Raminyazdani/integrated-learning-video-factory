@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/claude_package_plan.schema.json",
+  "title": "claude_package_plan",
+  "description": "Claude-authored package grouping decision + rationale (source of truth).",
+  "type": "object",
+  "required": ["run_id", "provenance", "source_pages", "uncertainty_notes", "packages"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] } } },
+    "source_pages": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } },
+    "packages": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["package_id", "original_page_numbers", "reason_for_grouping"],
+        "additionalProperties": true,
+        "properties": {
+          "package_id": { "type": "string" },
+          "original_page_numbers": { "type": "array", "items": { "type": "integer" } },
+          "reason_for_grouping": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

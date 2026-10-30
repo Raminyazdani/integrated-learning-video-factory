@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/deep_tutor_slide_spec.schema.json",
+  "title": "deep_tutor_slide_spec",
+  "description": "Claude-authored screenshot-anchored DEEP slide plan for one package (v2). Render target = XeLaTeX (Beamer or standalone) per docs/MIXED_PERSIAN_ENGLISH_RENDERING_POLICY.md + V2_DEEP_TUTOR_SOURCE_ANCHORING_POLICY.md. Python renders; never decides the plan.",
+  "type": "object",
+  "required": ["run_id", "package_id", "provenance", "source_pages", "render_engine", "uncertainty_notes", "slides"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "package_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] }, "timestamp": { "type": "string" } } },
+    "reviewer": { "type": "string" },
+    "policy_refs": { "type": "array", "items": { "type": "string" } },
+    "terminology_ref": { "type": "string" },
+    "source_pages": { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+    "render_engine": { "enum": ["xelatex_beamer", "xelatex_standalone", "xelatex_article"] },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } },
+    "slides": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["order", "type", "title_fa"],
+        "additionalProperties": true,
+        "properties": {
+          "order": { "type": "integer", "minimum": 1 },
+          "slide_id": { "type": "string" },
+          "type": { "enum": ["divider", "original_preview", "enriched_teaching", "formula_card", "example", "original_guided_reading", "original_recap", "checkpoint", "symbol_table", "notation_tracker", "exam_tips", "practice_qa", "summary", "other"] },
+          "title_fa": { "type": "string" },
+          "source_page": { "type": ["integer", "null"], "description": "1-based source page this slide is built from" },
+          "anchor_image_first": { "type": "boolean", "description": "true when the original screenshot/crop must appear before the explanation (anchoring policy)" },
+          "original_slide_image_path": { "type": ["string", "null"] },
+          "source_crop_path": { "type": ["string", "null"] },
+          "source_crop": { "type": ["object", "null"], "properties": { "page_id": { "type": "string" }, "crop_box": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 } } },
+          "body_fa": { "type": ["string", "null"], "description": "Persian teaching text; English terms must be LTR-wrapped, math in LaTeX math mode at render time" },
+          "formula_latex": { "type": "array", "items": { "type": "string" }, "description": "LaTeX math strings (math mode); never plain-text math" },
+          "symbol_table_ref": { "type": ["string", "null"], "description": "id/key into the package symbol table / notation tracker" },
+          "practice_qa_ref": { "type": ["string", "null"] },
+          "technical_terms_en": { "type": "array", "items": { "type": "string" } },
+          "layout_intent": { "type": ["string", "null"] },
+          "narration_goal_fa": { "type": ["string", "null"] },
+          "tts_notes": { "type": ["string", "null"] }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "enum": ["original_preview", "original_guided_reading", "original_recap"] } } },
+            "then": { "required": ["source_page", "anchor_image_first"], "properties": { "anchor_image_first": { "const": true } } }
+          }
+        ]
+      }
+    }
+  }
+}

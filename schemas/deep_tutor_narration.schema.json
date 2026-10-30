@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/deep_tutor_narration.schema.json",
+  "title": "deep_tutor_narration",
+  "description": "Claude-authored DEEP narration + Gemini-TTS-safe spoken text (v2). narration_text_fa = teacher script; tts_text_fa = spoken Persian with math verbalized, no raw symbols/paths/citations. Per docs/DEEP_PERSIAN_EXAM_TUTOR_VIDEO_POLICY.md §6.",
+  "type": "object",
+  "required": ["run_id", "provenance", "source_pages", "slides"],
+  "additionalProperties": true,
+  "properties": {
+    "run_id": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] }, "timestamp": { "type": "string" } } },
+    "reviewer": { "type": "string" },
+    "policy_refs": { "type": "array", "items": { "type": "string" } },
+    "terminology_ref": { "type": "string" },
+    "source_pages": { "type": "array", "items": { "type": "integer" } },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } },
+    "slides": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["slide_id", "narration_text_fa", "tts_text_fa"],
+        "additionalProperties": true,
+        "properties": {
+          "slide_id": { "type": "string" },
+          "display_text_fa": { "type": ["string", "null"] },
+          "narration_text_fa": { "type": "string", "description": "deep teacher-voice Persian script" },
+          "tts_text_fa": { "type": "string", "description": "Gemini-safe spoken Persian: math verbalized; NO raw symbols/paths/citations/JSON/package-ids" },
+          "tts_safe": { "type": "boolean", "description": "asserted true after tts-text-worker check (no raw symbols/paths)" },
+          "math_spoken_forms": {
+            "type": "array",
+            "description": "map of source formula -> its natural Persian spoken form used in tts_text_fa",
+            "items": { "type": "object", "required": ["formula_latex", "spoken_fa"], "properties": {
+              "formula_latex": { "type": "string" }, "spoken_fa": { "type": "string" } } }
+          },
+          "bilingual_terms_en": { "type": "array", "items": { "type": "string" } },
+          "source_pages": { "type": "array", "items": { "type": "integer" } },
+          "estimated_seconds": { "type": ["number", "null"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/lessonbook_coherence_review.schema.json",
+  "title": "lessonbook_coherence_review",
+  "description": "Coherence Editor / Final QA verdict for a chapter or the whole book against docs/LESSONBOOK_COHERENCE_QA_RUBRIC.md. Must score all 14 criteria with evidence. A report-like/checklist-like result FAILS.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "target", "reviewer", "rubric_version", "criteria", "verdict"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "target": { "type": "string", "description": "chapter_NNN or 'book'" },
+    "reviewed_artifact_path": { "type": "string" },
+    "reviewer": { "type": "string", "description": "e.g. coherence-editor | final-qa" },
+    "reviewed_at": { "type": "string" },
+    "rubric_version": { "type": "string" },
+    "criteria": {
+      "type": "array",
+      "minItems": 14,
+      "description": "one entry per rubric question (ids 1..14).",
+      "items": { "$ref": "#/$defs/criterion" }
+    },
+    "verdict": { "enum": ["PASS", "FAIL"] },
+    "blocking_fails": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 14 }, "description": "criterion ids that block (critical FAIL)" },
+    "fix_requests": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "criterion": {
+      "type": "object",
+      "required": ["id", "verdict"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "integer", "minimum": 1, "maximum": 14 },
+        "name": { "type": "string" },
+        "verdict": { "enum": ["PASS", "FAIL", "N/A"] },
+        "critical": { "type": "boolean" },
+        "evidence_fa": { "type": "string", "description": "quote/page reference supporting the verdict" }
+      }
+    }
+  }
+}

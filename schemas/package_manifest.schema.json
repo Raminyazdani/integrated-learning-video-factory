@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/package_manifest.schema.json",
+  "title": "package_manifest",
+  "description": "Stage 3 output. Educational package grouping (per docs/OUTPUT_ARTIFACT_SPEC.md §3.2).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "packages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "source_file": {
+      "type": "string"
+    },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/package_entry"
+      }
+    },
+    "skipped_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "context_only_pages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "package_entry": {
+      "type": "object",
+      "required": [
+        "package_id",
+        "package_title",
+        "page_range",
+        "original_page_numbers",
+        "reason_for_grouping",
+        "main_concepts"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "pattern": "^package_[0-9]{2,3}$"
+        },
+        "package_title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "page_range": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "original_page_numbers": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 1
+        },
+        "reason_for_grouping": {
+          "type": "string",
+          "minLength": 5
+        },
+        "prerequisite_concepts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "main_concepts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "formulas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "figures_or_plots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exercise_or_question_presence": {
+          "type": "boolean"
+        },
+        "expected_difficulty": {
+          "type": "string",
+          "enum": [
+            "beginner",
+            "intermediate",
+            "advanced",
+            "mixed",
+            "easy",
+            "medium",
+            "hard",
+            "unknown"
+          ]
+        },
+        "estimated_teaching_duration_min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "output_pdf_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_slides_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "narration_json_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output_video_segment_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "QA_status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "pass",
+            "warn",
+            "fail"
+          ]
+        },
+        "uncertainty_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "page_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^page_[0-9]{3,}$"
+          },
+          "description": "Per-page IDs aligned with original_page_numbers (1:1)."
+        },
+        "page_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Educational role string per page in the package (parallel to page_ids)."
+        },
+        "needs_deep_math_explanation": {
+          "type": "boolean"
+        },
+        "needs_visual_explanation": {
+          "type": "boolean"
+        },
+        "needs_notation_explanation": {
+          "type": "boolean"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "estimated_teaching_duration_minutes": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Alias of estimated_teaching_duration_min."
+        },
+        "next_stage_recommendation": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

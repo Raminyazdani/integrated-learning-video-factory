@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/slide_manifest.schema.json",
+  "title": "slide_manifest",
+  "description": "Stage 6 output. Slide-level metadata (per docs/OUTPUT_ARTIFACT_SPEC.md §3.3).",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "deck_path",
+    "slide_count",
+    "slides"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "deck_path": { "type": "string" },
+    "deck_pdf": { "type": ["string", "null"] },
+    "slide_count": { "type": "integer", "minimum": 1 },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/slide_entry" }
+    },
+    "generated_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "slide_entry": {
+      "type": "object",
+      "required": [
+        "slide_id",
+        "package_id",
+        "slide_index_in_package",
+        "slide_index_global",
+        "title",
+        "type"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "slide_id": { "type": "string", "pattern": "^p[0-9]{3}_s[0-9]{3}$" },
+        "package_id": { "type": "string", "pattern": "^package_[0-9]{2,3}$" },
+        "slide_index_in_package": { "type": "integer", "minimum": 1 },
+        "slide_index_global": { "type": "integer", "minimum": 1 },
+        "title": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "anchor",
+            "concept",
+            "notation",
+            "formula",
+            "example",
+            "figure",
+            "common_mistake",
+            "exam_trap",
+            "quiz",
+            "summary",
+            "divider",
+            "other"
+          ]
+        },
+        "source_pages": {
+          "type": "array",
+          "items": { "type": "integer" }
+        },
+        "image_path": { "type": ["string", "null"] },
+        "speaker_notes_excerpt": { "type": ["string", "null"] },
+        "duplicate_of": { "type": ["string", "null"] },
+        "slide_sha256": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

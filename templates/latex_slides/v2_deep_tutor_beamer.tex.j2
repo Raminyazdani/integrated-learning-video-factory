@@ -1,0 +1,39 @@
+% v2_deep_tutor_beamer.tex.j2 — XeLaTeX Beamer deck for the v2 deep tutor.
+% Rendered by integrations/latex_slide_renderer.py. 16:9 widescreen, RTL Persian
+% body (polyglossia), LTR English terms (\lrterm), math in math mode.
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{default}
+\usefonttheme{professionalfonts}      % stop beamer overriding XeLaTeX fonts
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamercolor{frametitle}{fg=white,bg=v2navy}
+
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage{persian}
+\setotherlanguage{english}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+
+% --- dynamic fonts (resolved by the renderer against persian_fonts.json) ---
+% Beamer defaults to sans-serif, so the Persian font must back BOTH the main and
+% sans families (and the explicit \arabicfontsf polyglossia uses for sans Arabic).
+\setmainfont{{ '{' }}{{ main_font }}{{ '}' }}[Script=Arabic]
+\setsansfont{{ '{' }}{{ main_font }}{{ '}' }}[Script=Arabic]
+\newfontfamily\arabicfontsf{{ '{' }}{{ main_font }}{{ '}' }}[Script=Arabic]
+\newfontfamily\arabicfont{{ '{' }}{{ main_font }}{{ '}' }}[Script=Arabic]
+\newfontfamily\englishfont{{ '{' }}{{ english_font }}{{ '}' }}
+\newfontfamily\persianfont{{ '{' }}{{ main_font }}{{ '}' }}[Script=Arabic]
+
+\input{{ '{' }}{{ macros_path }}{{ '}' }}
+
+\title{{ '{' }}{{ deck_title }}{{ '}' }}
+
+\begin{document}
+{% for frame in frames %}
+{{ frame }}
+{% endfor %}
+\end{document}

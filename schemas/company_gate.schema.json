@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/company_gate.schema.json",
+  "title": "company_gate",
+  "type": "object",
+  "required": ["gate_id", "kind", "member_task_ids", "expected_count", "collected_count", "status", "reviewer_agent"],
+  "additionalProperties": true,
+  "properties": {
+    "gate_id": { "type": "string" },
+    "kind": { "enum": ["join_gate", "supervisor_gate"] },
+    "parallel_group_id": { "type": ["string", "null"] },
+    "member_task_ids": { "type": "array", "items": { "type": "string" } },
+    "expected_count": { "type": "integer", "minimum": 0 },
+    "collected_count": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["open", "collecting", "ready", "pass", "fail"] },
+    "reviewer_agent": { "type": "string" },
+    "unlocks_tasks": { "type": "array", "items": { "type": "string" } },
+    "decision": { "type": ["string", "null"] },
+    "reasons": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://integrated_learning_video_factory/schemas/lessonbook_outline.schema.json",
+  "title": "lessonbook_outline",
+  "description": "Claude-authored whole-book learning arc for the PDF-first narrative lessonbook. Layer-A (structured plan). Source of truth; Python only consumes. Enforces a progressive, connected arc per docs/NARRATIVE_PEDAGOGY_POLICY.md. NOT shown verbatim in the PDF.",
+  "type": "object",
+  "required": ["schema_version", "run_id", "source_file", "provenance", "book_title_fa", "audience", "book_arc_fa", "chapters"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "run_id": { "type": "string" },
+    "source_file": { "type": "string" },
+    "provenance": { "type": "object", "required": ["authored_by"], "properties": { "authored_by": { "enum": ["CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"] }, "timestamp": { "type": "string" } } },
+    "generated_at": { "type": "string" },
+    "book_title_fa": { "type": "string", "minLength": 1 },
+    "book_intro_fa": { "type": "string", "description": "opening intuition for the whole book (plain Persian, no symbols)" },
+    "audience": { "type": "string", "description": "e.g. weak mathematical background; must follow without rereading slides" },
+    "book_arc_fa": { "type": "string", "minLength": 1, "description": "the through-line connecting all chapters (simple -> deep)" },
+    "term_intro_plan": {
+      "type": "array",
+      "description": "planned monotonic first-introduction of key English terms (prevents a glossary dump): each term is introduced inline in exactly one chapter the first time it is needed.",
+      "items": { "type": "object", "required": ["term_en", "first_chapter_id"], "properties": {
+        "term_en": { "type": "string" },
+        "first_chapter_id": { "type": "string" },
+        "gloss_fa": { "type": "string" } } }
+    },
+    "chapters": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "#/$defs/chapter_outline" }
+    },
+    "uncertainty_notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "chapter_outline": {
+      "type": "object",
+      "required": ["chapter_id", "package_id", "order", "title_fa", "learning_goals", "source_pages", "narrative_arc_fa", "anchor_screenshots"],
+      "additionalProperties": true,
+      "properties": {
+        "chapter_id": { "type": "string", "pattern": "^chapter_[0-9]+$" },
+        "package_id": { "type": "string" },
+        "order": { "type": "integer", "minimum": 1 },
+        "title_fa": { "type": "string", "minLength": 1 },
+        "learning_goals": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "prerequisites": { "type": "array", "items": { "type": "string" }, "description": "concepts/terms assumed (recapped briefly inline)" },
+        "builds_on": { "type": "array", "items": { "type": "string" }, "description": "earlier chapter_ids this depends on" },
+        "narrative_arc_fa": { "type": "string", "minLength": 1, "description": "intended arc of THIS chapter: intuition -> term -> formula -> example -> trap -> practice -> recap" },
+        "bridge_to_next_fa": { "type": "string", "description": "how this chapter hands off to the next" },
+        "source_pages": { "type": "array", "minItems": 1, "items": { "type": "integer" } },
+        "anchor_screenshots": {
+          "type": "array",
+          "description": "original source pages/crops used as learning anchors in this chapter",
+          "items": { "type": "object", "required": ["page", "image_path"], "properties": {
+            "page": { "type": "integer" },
+            "image_path": { "type": "string" },
+            "purpose_fa": { "type": "string" } } }
+        }
+      }
+    }
+  }
+}
