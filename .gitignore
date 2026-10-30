@@ -1,0 +1,37 @@
+# Secrets and account settings
+.env
+.env.*
+*.env
+**/secrets.*
+**/*credentials*
+# Private inputs, authored outputs, runtime state and captures
+input/
+output/
+runs/
+prompts/
+state/
+memory/
+logs/
+backups/
+QA_REPORTS/
+llm_cache/
+*.log
+*.pdf
+*.pptx
+*.mp4
+*.mp3
+*.wav
+*.zip
+# Local development
+.venv*/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.idea/
+.vscode/
+.claude/
+.codex/
+build/
+dist/

@@ -1,0 +1,8 @@
+# Optional integrations; these are disabled by the shipped configuration.
+edge-tts
+gTTS
+pyttsx3
+google-genai
+mutagen
+playwright
+requests
