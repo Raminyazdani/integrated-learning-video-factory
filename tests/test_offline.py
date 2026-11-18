@@ -122,12 +122,59 @@ class OfflineTests(unittest.TestCase):
                                     for pkg in result.packages))
 
     def test_original_authored_registries_empty_and_new_input_not_file_one(self):
-        from agents.persian_content_agent import _CURATED_CONTENT
         from agents.visual_classification_reviewer import _VISUAL_REVIEWS,_FILE1_SOURCE_NAMES,_load_run_reviews
-        self.assertFalse(_CURATED_CONTENT);self.assertFalse(_VISUAL_REVIEWS);self.assertFalse(_FILE1_SOURCE_NAMES)
+        self.assertFalse(_VISUAL_REVIEWS);self.assertFalse(_FILE1_SOURCE_NAMES)
         with tempfile.TemporaryDirectory() as t, contextlib.redirect_stdout(io.StringIO()):
             reviews,hints,low=_load_run_reviews(Path(t),{'source_file':'1.pdf'})
             self.assertEqual(reviews,{});self.assertEqual(low,[])
+
+    def test_content_provenance_applies_to_every_input(self):
+        from agents.package_metadata_agent import build_package_metadata
+        from agents.persian_content_agent import _dummy_content, run_content_generation
+        from integrations.claude_artifact_contract import (
+            ClaudeArtifactError, artifact_status, assert_claude_authored,
+        )
+        from scripts.generate_package_content import main as render
+
+        for name in ("1.pdf", "fictional-tiles.pdf"):
+            with self.subTest(source=name), tempfile.TemporaryDirectory() as temporary:
+                run = Path(temporary)
+                manifest = {
+                    "run_id": "fictional", "source_file": name,
+                    "packages": [{"package_id": "package_001", "original_page_numbers": [1]}],
+                }
+                (run / "packages").mkdir()
+                (run / "packages/package_manifest.json").write_text(json.dumps(manifest))
+                metadata = build_package_metadata(run, mode="manual_agent")
+                self.assertEqual(metadata["executor"], "BASELINE_AUTO")
+
+                with self.assertRaisesRegex(ClaudeArtifactError, "missing"):
+                    assert_claude_authored("content", run)
+                with self.assertRaisesRegex(ClaudeArtifactError, "missing"):
+                    run_content_generation(run)
+
+                path = run / "content_authored/package_001.json"
+                path.parent.mkdir()
+                content = _dummy_content(1)
+                content["provenance"] = {"authored_by": "HEURISTIC"}
+                path.write_text(json.dumps(content))
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    self.assertEqual(render(["--run", str(run), "--package", "package_001"]), 3)
+                self.assertFalse((run / "content_md").exists())
+
+                for declared in ("CLAUDE_CODE_MANUAL_AGENT", "CLAUDE_API"):
+                    content["provenance"]["authored_by"] = declared
+                    path.write_text(json.dumps(content))
+                    self.assertEqual(assert_claude_authored("content", run), "CLAUDE")
+                    rows = artifact_status(run)["artifacts"]
+                    self.assertTrue(next(row["claude_authored"] for row in rows
+                                         if row["stage"] == "content"))
+                    self.assertIn(content["package_title"], run_content_generation(run).md_path.read_text(encoding="utf-8"))
+
+                del content["learning_goal"]
+                path.write_text(json.dumps(content))
+                with self.assertRaisesRegex(ClaudeArtifactError, "schema FAIL"):
+                    run_content_generation(run)
 
     def test_cli_help_imports_without_network_or_runtime_inputs(self):
         from scripts.run_pipeline import main
@@ -155,6 +202,35 @@ class OfflineTests(unittest.TestCase):
             self.assertEqual(pages[0]['text_sha256'],sha256_of_file(pages[0]['text_path']))
             self.assertEqual(pages[0]['image_sha256'],sha256_of_file(pages[0]['image_path']))
             self.assertIn('Fictional lesson',Path(pages[0]['text_path']).read_text())
+
+    def test_offline_example_writes_extractable_tiles_and_matching_manifest(self):
+        from examples.offline_extraction import main
+        from integrations.pdf_extractor import sha256_of_file
+        from jsonschema import validate
+
+        with tempfile.TemporaryDirectory() as temporary:
+            workspace = Path(temporary) / "lesson"
+            with patch.object(sys, "argv", ["example", "--output", str(workspace)]), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(), 0)
+            manifest_path, = (workspace / "runs").glob("*/extracted/extraction_manifest.json")
+            run = manifest_path.parents[1]
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            schema = json.loads((ROOT / "schemas/extraction_manifest.schema.json").read_text())
+            validate(manifest, schema)
+            self.assertEqual(manifest["page_count"], 1)
+            page, = manifest["pages"]
+            self.assertEqual(page["extraction_status"], "ok")
+            for artifact in ("image", "text"):
+                self.assertEqual(sha256_of_file(run / page[f"{artifact}_path"]),
+                                 page[f"{artifact}_sha256"])
+            text = (run / page["text_path"]).read_text(encoding="utf-8")
+            self.assertEqual(text.splitlines(), [
+                "Counting a rectangle", "Three rows of four tiles cover twelve squares.",
+            ])
+            self.assertEqual((run / page["image_path"]).read_bytes()[:8],
+                             bytes.fromhex("89504e470d0a1a0a"))
+            self.assertTrue((run / "QA_REPORTS/extraction_report.md").is_file())
 
     def test_artifact_schemas_are_valid(self):
         from jsonschema.validators import validator_for

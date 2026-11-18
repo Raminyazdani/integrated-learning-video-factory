@@ -1,7 +1,7 @@
 """generate_package_content — Phase 4B CLI (K-page generic).
 
 Usage:
-  python scripts/generate_package_content.py --run runs/001_1_20260520_2128 --package package_001
+  python scripts/generate_package_content.py --run runs/<run_id> --package package_001
   python scripts/generate_package_content.py --dry-run-template-check
 
 The `--dry-run-template-check` flag exercises the K-page generic renderer
@@ -21,10 +21,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from agents.persian_content_agent import (  # noqa: E402
-    _CURATED_CONTENT,
     dry_run_template_check,
     run_content_generation,
 )
+from integrations.claude_artifact_contract import ClaudeArtifactError
 
 
 def _print_dry_run(summary: dict) -> int:
@@ -67,8 +67,7 @@ def main(argv: list | None = None) -> int:
     parser.add_argument(
         "--package",
         default=None,
-        help="Package id to generate content for (must be in _CURATED_CONTENT). "
-             f"Currently available: {sorted(_CURATED_CONTENT.keys())}.",
+        help="Package id in the run manifest with a run-specific authored content file.",
     )
     args = parser.parse_args(argv)
 
@@ -86,20 +85,10 @@ def main(argv: list | None = None) -> int:
         print(f"[ERROR] run folder not found: {run_dir}", file=sys.stderr)
         return 2
 
-    # Accept a package if it has run-specific authored content (generic path) OR
-    # is a file-1 curated sample. run_content_generation enforces the rest.
-    _authored = run_dir / "content_authored" / f"{args.package}.json"
-    if args.package not in _CURATED_CONTENT and not _authored.exists():
-        parser.error(
-            f"No content source for {args.package!r}: provide "
-            f"content_authored/{args.package}.json or use a file-1 curated package "
-            f"({sorted(_CURATED_CONTENT.keys())})."
-        )
-
     print(f"[Stage 4] Persian extended content for {args.package} in: {run_dir}")
     try:
         r = run_content_generation(run_dir, args.package)
-    except (FileNotFoundError, ValueError) as e:
+    except (FileNotFoundError, ValueError, ClaudeArtifactError) as e:
         print(f"[ERROR] {e}", file=sys.stderr)
         return 3
     except Exception:
@@ -118,7 +107,7 @@ def main(argv: list | None = None) -> int:
     print(f"image anchors : {r.image_anchor_count}")
     print(f"md token count: {r.word_count_fa}")
     print()
-    print(f"Stopped cleanly. Available packages: {sorted(_CURATED_CONTENT.keys())}.")
+    print(f"Rendered {args.package}.")
     return 0
 
 

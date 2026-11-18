@@ -2,9 +2,9 @@
 
 Replaces weak header-derived titles (e.g. "Bibliography") with topic-based Persian
 metadata derived from the package's PAGE REVIEWS (classification/llm_page_review.json
-or authored_review.json) — NOT from clean_package_manifest.py's file-1 curated data.
+or authored_review.json).
 
-Per-package source precedence (no file-1/file-3 leakage, no fabrication):
+Per-package source precedence:
   1. manual-agent authored metadata (passed in `authored_metadata`)   -> CLAUDE_CODE_MANUAL_AGENT
   2. llm_client.package_titles(...) when available (None in manual/    -> LLM_PAID / LLM_DRY_RUN
      dry-run)
@@ -51,11 +51,6 @@ def _load_reviews(run_dir: Path) -> dict:
         if p.is_file():
             return _read(p).get("reviews", {}) or {}
     return {}
-
-
-def _is_file1(manifest: dict) -> bool:
-    sf = (manifest.get("source_file") or "").replace("\\", "/").lower().rsplit("/", 1)[-1]
-    return sf in {"1.pdf", "l01_-_introduction_to_ml.pdf"}
 
 
 def _derive(pkg: dict, reviews: dict) -> dict:
@@ -105,8 +100,6 @@ def build_package_metadata(run_dir, *, mode: str = None, llm_client=None,
     run_dir = Path(run_dir).resolve()
     mani_path = run_dir / "packages" / "package_manifest.json"
     manifest = _read(mani_path)
-    if _is_file1(manifest):
-        raise ValueError("Refusing: file-1 uses curated titles, not this generic path.")
     try:
         from integrations.pipeline_mode import resolve_mode
         mode = resolve_mode(mode)
@@ -159,7 +152,7 @@ def build_package_metadata(run_dir, *, mode: str = None, llm_client=None,
         "prompt_version": "v1",
         "packages": out_meta,
         "notes": [f"authored={used_authored} llm={used_llm} baseline={used_baseline}",
-                  "No file-1 curated titles used; derived from page reviews of this run."],
+                  "Metadata sources apply to this run."],
     }
     _write(run_dir / "packages" / "package_metadata_llm.json", obj)
     return obj

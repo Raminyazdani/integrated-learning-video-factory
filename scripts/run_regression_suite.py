@@ -46,18 +46,22 @@ def _run_dir(token):
     return cands[-1] if cands else None
 
 
-def t1_file1_gated():
-    try:
-        from agents.visual_classification_reviewer import _is_file1_run
-        f1 = _is_file1_run({"source_file": "input/1.pdf"})
-        ft = _is_file1_run({"source_file": "input/test.pdf"})
-        ok, _ = _validate("1")
-        if f1 and not ft and ok:
-            record(1, "file-1 curated fixture gated + validate", "PASS", "is_file1(1)=True, is_file1(test)=False, validate 1 pass")
-        else:
-            record(1, "file-1 curated fixture gated + validate", "FAIL", f"f1={f1} ft={ft} validate={ok}")
-    except Exception as e:
-        record(1, "file-1 curated fixture gated + validate", "FAIL", repr(e))
+def t1_requires_authored_content():
+    from integrations.claude_artifact_contract import ClaudeArtifactError, assert_claude_authored
+
+    with tempfile.TemporaryDirectory() as temporary:
+        run = Path(temporary)
+        (run / "packages").mkdir()
+        for filename in ("1.pdf", "fictional-tiles.pdf"):
+            (run / "packages/package_manifest.json").write_text(
+                json.dumps({"source_file": filename, "packages": []}), encoding="utf-8")
+            try:
+                assert_claude_authored("content", run)
+            except ClaudeArtifactError:
+                continue
+            record(1, "content requires an authored artifact", "FAIL", filename)
+            return
+    record(1, "content requires an authored artifact", "PASS")
 
 
 def t2_file3_valid():
@@ -221,7 +225,7 @@ def t13_cache_key_created():
 
 def main():
     print("=== regression suite (read-only / dry-run / safe) ===")
-    for fn in (t1_file1_gated, t2_file3_valid, t3_testpdf_valid, t4_no_leak_to_test,
+    for fn in (t1_requires_authored_content, t2_file3_valid, t3_testpdf_valid, t4_no_leak_to_test,
                t5_named_input, t6_llm_dry_run_no_paid, t7_slide_consistency, t8_tts_provider,
                t9_ffmpeg, t10_missing_key_fail_closed, t11_bad_pdf,
                t12_paid_no_approval, t13_cache_key_created):

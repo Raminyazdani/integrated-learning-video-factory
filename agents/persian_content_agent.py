@@ -1,4 +1,4 @@
-"""Generic Persian content renderer. The original run-specific curated content table is intentionally empty in this source-only release. Supply content_authored/<package_id>.json for each new run; missing authored content fails explicitly."""
+"""Render Persian lesson content from a validated run-specific authored artifact."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from integrations.atomic_io import atomic_write_json, atomic_write_text, iso_now, read_json
+from integrations.claude_artifact_contract import load_claude_authored
 
 PACKAGE_CONTENT_SCHEMA_VERSION = "1.0.0"
 
@@ -19,14 +20,6 @@ class ContentResult:
     image_anchor_count: int
     word_count_fa: int
     page_count: int
-
-
-# ============================================================================
-# Curated content registry.
-# Each entry follows the data contract in prompts/persian_tutor_content_prompt.md.
-# ============================================================================
-
-_CURATED_CONTENT: dict[str, dict] = {}
 
 
 # ----------------------------------------------------------------- helpers
@@ -420,12 +413,7 @@ def _qa_report(*, run_id: str, package_id: str, c: dict, md_text: str, json_obj:
 
 
 def run_content_generation(run_dir, package_id: str = "package_001", mode: str = None) -> ContentResult:
-    """Generate Persian extended content for the named package using the
-    K-page generic renderer.
-
-    `mode` (pipeline execution mode) is resolved via integrations/pipeline_mode;
-    it enforces fail-closed policy so Phase 4 never silently fabricates weak
-    content for non-file-1 inputs."""
+    """Render the named package from this run's schema-validated authored content."""
     run_dir = Path(run_dir).resolve()
 
     mani_path = run_dir / "packages" / "package_manifest.json"
@@ -436,40 +424,12 @@ def run_content_generation(run_dir, package_id: str = "package_001", mode: str =
     if pkg is None:
         raise ValueError(f"{package_id} not found in package_manifest.json")
 
-    # Content source precedence (generic-safe):
-    #   1. run-specific authored content `content_authored/<package_id>.json`
-    #      (the generic per-input path; e.g. file 3 authored via Claude Code).
-    #   2. file-1 baked `_CURATED_CONTENT` — ONLY when its source_pages match the
-    #      manifest (i.e. the file-1 gold sample). Never reused for other inputs.
-    #   3. otherwise: refuse (no fabrication, no file-1 leakage).
     authored_path = run_dir / "content_authored" / f"{package_id}.json"
-    if authored_path.exists():
-        c = read_json(authored_path)
-    elif package_id in _CURATED_CONTENT and \
-            list(_CURATED_CONTENT[package_id]["source_pages"]) == list(pkg["original_page_numbers"]):
-        c = dict(_CURATED_CONTENT[package_id])
-    else:
-        # Fail-closed policy: understanding/authoring stage must NOT fabricate weak
-        # content. In llm_paid mode this raises (no llm_client yet); in
-        # manual_agent / llm_dry_run / mechanical_fallback it returns and we refuse
-        # below (authored content required).
-        _resolved_mode = mode
-        try:
-            from integrations.pipeline_mode import (
-                resolve_mode as _resolve_mode,
-                fail_closed_if_stage_needs_llm as _fail_closed,
-            )
-            _resolved_mode = _resolve_mode(mode)
-            _fail_closed("content_generation", _resolved_mode,
-                         has_authored=False, llm_client_available=False, approved=False)
-        except ImportError:
-            _resolved_mode = mode or "manual_agent"
-        raise ValueError(
-            f"No generic content source for {package_id!r} [mode={_resolved_mode}]. Provide "
-            f"content_authored/{package_id}.json (authored from this run's pages, or by a "
-            f"real LLM in mode=llm_paid). File-1 _CURATED_CONTENT is only used when its "
-            f"source_pages match the manifest (gold sample); it is never applied to other inputs."
-        )
+    if not authored_path.is_file():
+        from integrations.pipeline_mode import resolve_mode, fail_closed_if_stage_needs_llm
+        fail_closed_if_stage_needs_llm("content_generation", resolve_mode(mode),
+                                       has_authored=False, llm_client_available=False, approved=False)
+    c = load_claude_authored("content", run_dir, package_id=package_id)
     if list(c["source_pages"]) != list(pkg["original_page_numbers"]):
         raise ValueError(
             f"content source_pages {c['source_pages']} != manifest "

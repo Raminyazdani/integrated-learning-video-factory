@@ -27,7 +27,7 @@ def main(argv=None) -> int:
         print(f"[ERROR] run not found: {run_dir}", file=sys.stderr); return 2
 
     st = artifact_status(run_dir)
-    print(f"=== Claude artifact contract — {st['run_id']} (is_file1={st['is_file1']}) ===")
+    print(f"=== Claude artifact contract — {st['run_id']} ===")
     present = missing = 0
     for r in st["artifacts"]:
         if r["exists"]:

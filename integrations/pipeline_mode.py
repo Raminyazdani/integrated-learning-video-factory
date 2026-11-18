@@ -111,7 +111,7 @@ def fail_closed_if_stage_needs_llm(
     Raises PipelineModeError when the stage cannot proceed safely.
 
     - manual_agent / llm_dry_run: require authored files; NEVER paid; if no authored
-      input and not a static file-1 match, the CALLER must refuse (no fabrication).
+      input, the CALLER must refuse (no fabrication).
     - llm_paid: requires a real LLM client + approval (and key/budget checked by the
       client). If not available -> fail-closed.
     - mechanical_fallback: allowed for smoke only; output marked low-quality.
@@ -129,7 +129,7 @@ def fail_closed_if_stage_needs_llm(
                 "mark_low_quality": True, "source": "mechanical_fallback"}
 
     if mode in ("manual_agent", "llm_dry_run"):
-        # never paid; require authored content (or a gated static file-1 match the caller handles)
+        # Require run-specific authored content.
         return {"allow_paid": False, "require_authored": True,
                 "mark_low_quality": False,
                 "source": "authored" if has_authored else "authored_required"}

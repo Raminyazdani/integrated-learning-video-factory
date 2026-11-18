@@ -65,6 +65,15 @@
         "type": "string"
       }
     },
+    "image_rendering_status": {
+      "enum": ["complete", "pending_local", "failed"]
+    },
+    "image_rendering_error": {
+      "type": ["string", "null"]
+    },
+    "image_rendering_strategy": {
+      "type": ["string", "null"]
+    },
     "extracted_at": {
       "type": "string",
       "format": "date-time"
